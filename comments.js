@@ -1,53 +1,41 @@
-//create web server
+// create web server
+
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
+const port = 3000;
 
-//importing file
-const comments = require('./comments.json');
-const cors = require('cors');
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
 
-//middleware
-app.use(cors());
-app.use(express.json());
+const comments = [
+    { username: 'Tom', content: 'Hello World!', created_at: '2018-10-15T16:00:00.000Z' },
+    { username: 'Bob', content: 'Nice to meet you!', created_at: '2018-10-16T16:00:00.000Z' },
+];
 
-//creating server
-app.listen(3000, () => {
-    console.log('Server is running...');
-});
-
-//GET request
+// GET /comments
 app.get('/comments', (req, res) => {
-    res.json(comments);
+    res.send(comments);
 });
 
-//POST request
+// POST /comments
 app.post('/comments', (req, res) => {
-    //get the data from client
-    const comment = req.body;
-    //add the data to json
-    comments.push(comment);
-    //send the updated json to client
-    res.json(comment);
+    // req.body
+    comments.unshift({
+        username: req.body.username,
+        content: req.body.content,
+        created_at: new Date(),
+    });
+    res.send(comments);
 });
 
-//PUT request
-app.put('/comments/:id', (req, res) => {
-    //get the id from client
-    const id = req.params.id;
-    //get the data from client
-    const comment = req.body;
-    //update the data in json
-    comments[id] = comment;
-    //send the updated json to client
-    res.json(comment);
-});
-
-//DELETE request
+// DELETE /comments/:id
 app.delete('/comments/:id', (req, res) => {
-    //get the id from client
-    const id = req.params.id;
-    //delete the data from json
-    comments.splice(id, 1);
-    //send the updated json to client
-    res.json(comments);
+    // req.params
+    comments.splice(req.params.id, 1);
+    res.send(comments);
 });
+
+app.listen(port, () => console.log(`app listening on port ${port}!`));
